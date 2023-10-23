@@ -2,7 +2,7 @@
   font-family: sans-serif;
   text-align: center;
 }
-.pdf-viewer-with-draggable {
+.viewer-with-draggable {
   display: flex;
   height: 500vh;
 
@@ -143,11 +143,30 @@ footer {
   text-align: center;
   padding: 10px 0;
   display: flex;
-  justify-content: center;
+  justify-content:center;
   align-items: center;
   border-top: 1px solid #ccc;
+  gap: 100px;
 }
 .border-bottom-custom {
   border-bottom: 1px solid #ccc;
 }
 
+
+
+.home-container {
+  padding: 20px;
+}
+
+.list-file-group {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.list-file {
+  cursor: pointer;
+}
+
+.list-file:hover {
+  background-color: #f8f9fa;
+}
