@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useParams } from "react-router-dom";
 import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import DraggableCard from "./DraggableCard";
 import { DocRenderer } from "@cyntler/react-doc-viewer";
 import documents from "../documents";
+import Content from "../component/Content";
+
 
 type ShapeType = {
   type: "square" | "circle" | "triangle";
@@ -34,39 +42,59 @@ type DocViewerProps = {
   };
   style: { height: string };
 };
+interface DocumentViewerProps {
+  updateDocumentsState?: (updatedDocuments: DocumentType[]) => void;
+}
 
-const DocumentViewer: React.FC = () => {
+
+const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState }) => {
   const { id } = useParams<{ id: string }>();
   const [document, setDocument] = useState<DocumentType | null>(null);
   const [viewerHeight, setViewerHeight] = useState<string>("100%");
   const [shapes, setShapes] = useState<ShapeType[]>([]);
   const docViewerRef = useRef<HTMLDivElement>(null);
+  const [text, setText] = useState<string>("");
+  const [assign, setAssign] = useState<string>("");
+  const [status, setStatus] = useState<string>("");
 
   useEffect(() => {
-    const foundDocument = documents.find((doc) => doc.id === id) as
-      | DocumentType
-      | undefined;
+    const foundDocument = documents.find((doc) => doc.id === id);
     if (foundDocument) {
       setDocument(foundDocument);
     } else {
       setDocument(null);
     }
-
-    // tải tài liệu đã lưu từ local storage
-    const savedShapes = localStorage.getItem(`shapes_${id}`);
-    if (savedShapes) {
-      setShapes(JSON.parse(savedShapes));
+  
+    const savedData = localStorage.getItem(`documentData_${id}`);
+    if (savedData) {
+      const { shapes, text, assign, status } = JSON.parse(savedData);
+      setShapes(shapes);
+      setText(text);
+      setAssign(assign);
+      setStatus(status);
     }
   }, [id]);
-  const handleSave = () => {
-    if (shapes.length > 0) {
-      localStorage.setItem(`shapes_${id}`, JSON.stringify(shapes));
+  
+
+  const handleSave = useCallback(() => {
+    if (shapes.length > 0 || text || assign || status) {
+      const dataToSave = { shapes, text, assign, status };
+      localStorage.setItem(`documentData_${id}`, JSON.stringify(dataToSave));
       alert("Dữ liệu đã được lưu!");
+  
+      const updatedDocuments = documents.map((doc) => 
+        doc.id === id ? { ...doc, assign, status } : doc
+      );
+      localStorage.setItem("documents", JSON.stringify(updatedDocuments));
+      if (typeof updateDocumentsState === 'function') {
+        updateDocumentsState(updatedDocuments);
+      }
     } else {
       alert("Dữ liệu chưa được lưu!");
     }
-  };
+  }, [id, shapes, text, assign, status, updateDocumentsState]);
   
+
   useEffect(() => {
     const updateViewerHeight = () => {
       if (docViewerRef.current) {
@@ -101,18 +129,6 @@ const DocumentViewer: React.FC = () => {
     return [{ uri: document.uri }];
   };
 
-  const toggleFileType = () => {
-    if (document) {
-      const fileTypes = ["pdf", "xlsx", "docx", "ppt"];
-      const currentIndex = fileTypes.indexOf(document.fileType);
-      const nextIndex = (currentIndex + 1) % fileTypes.length;
-      const newFileType = fileTypes[nextIndex] as DocumentType["fileType"];
-      console.log("Chuyển đổi sang loại file:", newFileType);
-      setDocument({ ...document, fileType: newFileType });
-      setShapes([]);
-    }
-  };
-
   const addShape = (shapeType: "square" | "circle" | "triangle") => {
     const newShape = {
       type: shapeType,
@@ -135,6 +151,7 @@ const DocumentViewer: React.FC = () => {
   const removeShape = (indexToRemove: number) => {
     const newShapes = shapes.filter((_, index) => index !== indexToRemove);
     setShapes(newShapes);
+    localStorage.setItem(`shapes_${id}`, JSON.stringify(newShapes));
   };
 
   return (
@@ -171,34 +188,19 @@ const DocumentViewer: React.FC = () => {
             <button onClick={() => addShape("triangle")}>triangle</button>
           </div>
 
-          <div className="button-shape-container-content">
-            <div className="button-shape-container-content-text">
-              <textarea placeholder="Nhập thông tin ở đây"></textarea>
-            </div>
-            <div className="button-shape-container-content-state">
-              アサイン
-              <select>
-                <option value="option1">HOANG VAN HIEU</option>
-                <option value="option2">NGUYEN VAN DUNG</option>
-                <option value="option3">HUYNH TUAN THANH</option>
-                <option value="option1">NGUYEN VAN VAN</option>
-                <option value="option2">VO NHAT QUANG</option>
-              </select>
-              ステータス
-              <select>
-                <option value="option1">未着手</option>
-                <option value="option2">進行中</option>
-                <option value="option3">完了</option>
-              </select>
-            </div>
-          </div>
+          <Content
+            text={text}
+            assign={assign}
+            status={status}
+            onChangeAssign={setAssign}
+            onChangeStatus={setStatus}
+            onChangeText={setText}
+          />
         </div>
       </div>
 
       <footer>
-        <button className="button-link" onClick={toggleFileType}>
-          Chuyển đổi
-        </button>
+   
         <button className="button-link" onClick={handleSave}>
           Save
         </button>

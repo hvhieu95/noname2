@@ -71,50 +71,8 @@
   gap: 10px;
   height: 70vh;
 }
-.button-shape-container-content{
-  height: 50%;
-  width: 20%;
-  position: fixed;
-  top: 50%;
-  z-index: 1000;
-  gap: 10px;
-  display: flex;
-  flex-direction: column;
-  background-color: white;
-  border: 1px solid #ccc;
 
-  bottom: 0; 
-  transform: translateY(-60px); 
-}
-.select-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.select-container select {
-  margin-top: 10px;
-}
-.button-shape-container-content-state {
-  display: flex;
-  flex-direction: row; 
-  align-items: center;
-  display: flex;
-  gap: 10px;
-}
-
-.button-shape-container-content-state span {
-  margin-right: 20px;
-}
-
-
-.button-shape-container-content-text {
-  display: flex;
-  flex-direction: column;
-  margin-top: 80%;
-
-}
-textarea {
+.textarea {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -130,7 +88,7 @@ select {
   margin-top: 10px;
   border-radius: 5px;
 }
-.button-shape-container-content-state label {
+.container-content-state label {
   font-weight:lighter;
   margin-bottom: 5px;
 }
@@ -153,20 +111,71 @@ footer {
 }
 
 
+.container-content{
+  height: 50%;
+  width: 20%;
+  position: fixed;
+  top: 50%;
+  z-index: 1000;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border: 1px solid #ccc;
+  bottom: 0; 
+  transform: translateY(-60px); 
+  flex: 1;
 
+}
+.select-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.select-container select {
+  margin-top: 10px;
+}
+.container-content-state {
+  display: flex;
+  flex-direction: row; 
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.container-content-state span {
+  margin-right: 20px;
+}
+
+
+.container-content-text {
+  display: flex;
+  flex-direction: column;
+  margin-top: 80%;
+
+}
 .home-container {
-  padding: 20px;
-}
-
-.list-file-group {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.list-file {
-  cursor: pointer;
-}
-
-.list-file:hover {
   background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+  margin-top: 20px;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.list-file a {
+  color: #0056b3;
+  font-weight: 500;
+}
+
+.list-file a:hover {
+  text-decoration: underline;
 }

@@ -1,11 +1,14 @@
+
 export type DocumentType = {
   id: string;
   name: string;
   uri: string;
-  fileType:string;
+  fileType: "pdf" | "xlsx" | "docx" | "ppt";
+  assign?:string;
+  status?:string
 };
 
-const documents: DocumentType[] = [
+export const documents: DocumentType[] = [
   {
     id: "1",
     name: "file pdf",
@@ -31,4 +34,5 @@ const documents: DocumentType[] = [
     fileType:"ppt",
   },
 ];
-export default documents;
+
+export default documents
