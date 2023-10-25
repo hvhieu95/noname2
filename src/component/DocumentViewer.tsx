@@ -3,12 +3,9 @@ import React, {
   useEffect,
   useRef,
   useCallback,
-  useMemo,
 } from "react";
 import { useParams } from "react-router-dom";
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import DraggableCard from "./DraggableCard";
-import { DocRenderer } from "@cyntler/react-doc-viewer";
 import documents from "../documents";
 import Content from "../component/Content";
 
@@ -16,7 +13,10 @@ import Content from "../component/Content";
 type ShapeType = {
   type: "square" | "circle" | "triangle";
   position: { x: number; y: number };
+  size: { width: number; height: number };
+  text: string;
 };
+
 type State = {
   fileType: "pdf" | "xlsx" | "docx" | "image" | "ppt";
   viewerHeight: string;
@@ -30,30 +30,19 @@ type DocumentType = {
   fileType: "pdf" | "xlsx" | "docx" | "ppt";
 };
 
-type DocViewerProps = {
-  documents: Array<{ uri: string }>;
-  pluginRenderers: DocRenderer[];
-  config: {
-    header: {
-      disableHeader: boolean;
-      disableFileName: boolean;
-      retainURLParams: boolean;
-    };
-  };
-  style: { height: string };
-};
+
 interface DocumentViewerProps {
   updateDocumentsState?: (updatedDocuments: DocumentType[]) => void;
 }
 
 
-const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState }) => {
+const DocumentViewer = ({ updateDocumentsState }:DocumentViewerProps) => {
   const { id } = useParams<{ id: string }>();
   const [document, setDocument] = useState<DocumentType | null>(null);
   const [viewerHeight, setViewerHeight] = useState<string>("100%");
   const [shapes, setShapes] = useState<ShapeType[]>([]);
   const docViewerRef = useRef<HTMLDivElement>(null);
-  const [text, setText] = useState<string>("");
+  const [comment, setComment] = useState<string>("");
   const [assign, setAssign] = useState<string>("");
   const [status, setStatus] = useState<string>("");
 
@@ -67,9 +56,10 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
   
     const savedData = localStorage.getItem(`documentData_${id}`);
     if (savedData) {
-      const { shapes, text, assign, status } = JSON.parse(savedData);
+      const { shapes, comment, assign, status } = JSON.parse(savedData);
+      console.log("Loaded data:", { shapes, comment, assign, status });
       setShapes(shapes);
-      setText(text);
+      setComment(comment);
       setAssign(assign);
       setStatus(status);
     }
@@ -77,8 +67,9 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
   
 
   const handleSave = useCallback(() => {
-    if (shapes.length > 0 || text || assign || status) {
-      const dataToSave = { shapes, text, assign, status };
+    if (document && shapes.length > 0 || comment || assign || status) {
+      const dataToSave = { shapes, comment, assign, status };
+      console.log("Saving data:", dataToSave); 
       localStorage.setItem(`documentData_${id}`, JSON.stringify(dataToSave));
       alert("Dữ liệu đã được lưu!");
   
@@ -92,7 +83,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
     } else {
       alert("Dữ liệu chưa được lưu!");
     }
-  }, [id, shapes, text, assign, status, updateDocumentsState]);
+  }, [id, shapes, comment, assign, status, updateDocumentsState,document]);
   
 
   useEffect(() => {
@@ -125,14 +116,13 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
     return <div>Không tìm thấy tài liệu</div>;
   }
 
-  const getDocuments = () => {
-    return [{ uri: document.uri }];
-  };
 
   const addShape = (shapeType: "square" | "circle" | "triangle") => {
     const newShape = {
       type: shapeType,
       position: { x: 0, y: 0 },
+      size: { width: 150, height: 150 },
+      text: "",
     };
     setShapes((prevShapes) => [...prevShapes, newShape]);
   };
@@ -147,6 +137,27 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
       return newShapes;
     });
   };
+  
+
+  const updateShapeText = (index: number, text: string) => {
+    setShapes((prevShapes) => {
+      const newShapes = [...prevShapes];
+      newShapes[index] = { ...newShapes[index], text };
+      return newShapes;
+    });
+  };
+  
+
+  const updatedShapeSize = (index: number, size: { width: number; height: number }) => {
+    setShapes((prevShapes) => {
+      const newShapes = [...prevShapes];
+      newShapes[index] = { ...newShapes[index], size };
+      return newShapes;
+    });
+  };
+  
+
+
 
   const removeShape = (indexToRemove: number) => {
     const newShapes = shapes.filter((_, index) => index !== indexToRemove);
@@ -175,6 +186,10 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
                 key={index}
                 shape={shape.type}
                 position={shape.position}
+                size={shape.size}
+                onResize={(size) => updatedShapeSize(index, size)}
+                text={shape.text}
+                onTextChange={(newText) => updateShapeText(index, newText)}
                 onRemove={() => removeShape(index)}
                 onUpdatePosition={(position: { x: number; y: number }) =>
                   onUpdateShapePosition(index, position)
@@ -189,12 +204,12 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ updateDocumentsState })
           </div>
 
           <Content
-            text={text}
+            comment={comment}
             assign={assign}
             status={status}
             onChangeAssign={setAssign}
             onChangeStatus={setStatus}
-            onChangeText={setText}
+            onChangeComment={setComment}
           />
         </div>
       </div>

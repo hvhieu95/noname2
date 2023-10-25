@@ -1,23 +1,22 @@
 
-import { useState } from "react"
 
 type ContentType={
-    text:string,
+    comment:string,
     assign:string,
     status:string,
-    onChangeText:(text:string)=>void,
+    onChangeComment:(comment:string)=>void,
     onChangeStatus:(status:string)=>void,
     onChangeAssign:(assign:string)=>void
 }
 
-const Content= ({ text, assign, status, onChangeAssign, onChangeStatus, onChangeText }:ContentType) => {
+const Content= ({ comment, assign, status, onChangeAssign, onChangeStatus, onChangeComment }:ContentType) => {
    
 
 
     return(
         <div className="container-content">
         <div className="container-content-text">
-          <textarea value={text} placeholder="Nhập thông tin ở đây"onChange={(e) => onChangeText(e.target.value)}></textarea>
+          <textarea value={comment} placeholder="Nhập thông tin ở đây"onChange={(e) => onChangeComment(e.target.value)}></textarea>
         </div>
         <div className="container-content-state">
           アサイン

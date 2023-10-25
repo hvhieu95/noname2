@@ -9,8 +9,12 @@ type DraggableCardProps = {
   onRemove: () => void;
   position: { x: number; y: number };
   onUpdatePosition: (position: { x: number; y: number }) => void;
+  text:string;
+  onTextChange: (text: string) => void;
+  size:{width:number,height:number}
+  onResize: (size: { width: number; height: number }) => void;
 };
-const DraggableCard = ({ shape, onRemove,position,onUpdatePosition }: DraggableCardProps) => {
+const DraggableCard = ({ shape, onRemove,position,onUpdatePosition, text, onTextChange,size ,onResize}: DraggableCardProps) => {
   const [cardText, setCardText] = useState<string>("text");
   const [disableDragging, setDisableDragging] = useState<boolean>(false);
 
@@ -36,6 +40,11 @@ const DraggableCard = ({ shape, onRemove,position,onUpdatePosition }: DraggableC
   const handleStop = () => {
     setDisableDragging(false);
   };
+
+  const handleResize = (event: any, { size }: { size: { width: number, height: number } }) => {
+    onResize(size);
+  }
+  
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Delete") {
       onRemove();
@@ -54,8 +63,9 @@ const DraggableCard = ({ shape, onRemove,position,onUpdatePosition }: DraggableC
         <div onKeyDown={handleKeyDown} tabIndex={0}>
           <ResizableBox
             resizeHandles={["nw", "ne", "sw", "se", "n", "e", "s", "w"]}
-            width={200}
-            height={150}
+            width={size.width}
+            height={size.height}
+            onResize={handleResize}
             style={{
               ...shapeStyles[shape],
               display: "flex",
@@ -66,8 +76,8 @@ const DraggableCard = ({ shape, onRemove,position,onUpdatePosition }: DraggableC
             }}
           >
             <textarea
-              value={cardText}
-              onChange={handleTextChange}
+            value={text}
+            onChange={(e) => onTextChange(e.target.value)}
               style={{
                 ...shapeStyles[shape],
                 backgroundColor: "lightblue",
