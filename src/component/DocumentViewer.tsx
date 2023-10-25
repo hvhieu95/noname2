@@ -8,7 +8,7 @@ import { useParams } from "react-router-dom";
 import DraggableCard from "./DraggableCard";
 import documents from "../documents";
 import Content from "../component/Content";
-
+import { useDocuments } from "../DocumentContext";
 
 type ShapeType = {
   type: "square" | "circle" | "triangle";
@@ -45,11 +45,15 @@ const DocumentViewer = ({ updateDocumentsState }:DocumentViewerProps) => {
   const [comment, setComment] = useState<string>("");
   const [assign, setAssign] = useState<string>("");
   const [status, setStatus] = useState<string>("");
+  const { documents: globalDocuments, setDocuments: setGlobalDocuments } = useDocuments();
+
 
   useEffect(() => {
-    const foundDocument = documents.find((doc) => doc.id === id);
+    const foundDocument = globalDocuments.find((doc) => doc.id === id);
     if (foundDocument) {
       setDocument(foundDocument);
+    setAssign(foundDocument.assign || "");
+    setStatus(foundDocument.status || "");
     } else {
       setDocument(null);
     }
@@ -57,34 +61,33 @@ const DocumentViewer = ({ updateDocumentsState }:DocumentViewerProps) => {
     const savedData = localStorage.getItem(`documentData_${id}`);
     if (savedData) {
       const { shapes, comment, assign, status } = JSON.parse(savedData);
-      console.log("Loaded data:", { shapes, comment, assign, status });
       setShapes(shapes);
       setComment(comment);
       setAssign(assign);
       setStatus(status);
     }
-  }, [id]);
-  
+  }, [id, globalDocuments]);
+
+
+
 
   const handleSave = useCallback(() => {
-    if (document && shapes.length > 0 || comment || assign || status) {
+    if (document && (shapes.length > 0 || comment || assign || status)) {
       const dataToSave = { shapes, comment, assign, status };
-      console.log("Saving data:", dataToSave); 
       localStorage.setItem(`documentData_${id}`, JSON.stringify(dataToSave));
-      alert("Dữ liệu đã được lưu!");
+      alert("データが保存されました!");
   
-      const updatedDocuments = documents.map((doc) => 
-        doc.id === id ? { ...doc, assign, status } : doc
+      const updatedDocument = { ...document, assign, status };
+      const updatedGlobalDocuments = globalDocuments.map((doc) => 
+        doc.id === id ? updatedDocument : doc
       );
-      localStorage.setItem("documents", JSON.stringify(updatedDocuments));
-      if (typeof updateDocumentsState === 'function') {
-        updateDocumentsState(updatedDocuments);
-      }
+      setGlobalDocuments(updatedGlobalDocuments);
     } else {
-      alert("Dữ liệu chưa được lưu!");
+      alert("データが保存されていません!");
     }
-  }, [id, shapes, comment, assign, status, updateDocumentsState,document]);
-  
+  }, [id, shapes, comment, assign, status, document, globalDocuments, setGlobalDocuments]);
+
+
 
   useEffect(() => {
     const updateViewerHeight = () => {
